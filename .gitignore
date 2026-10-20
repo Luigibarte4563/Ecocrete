@@ -1,0 +1,10 @@
+# secrets: Gmail credentials live here and must never be committed
+.env
+.env.local
+.env.*.local
+
+node_modules/
+.vercel/
+*.log
+.DS_Store
+Thumbs.db

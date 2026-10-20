@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoCrete · Smart Concrete Estimation for Better Building</title>
+    <meta name="description"
+        content="Civil engineering concrete mix estimator, volumetric batching calculator, SCM carbon reduction analyzer, and subscription management." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css" />
+    <script type="module" src="js/home.js"></script>
+</head>
+
+<body>
+
+    <div id="header"></div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-badge">Eurocode 2 &amp; ACI 318 Volumetric Mix Design</div>
+                <h1 class="hero-title">Civil Engineering <span>Concrete Mix</span> &amp; Material Estimator</h1>
+                <p class="hero-desc">Calculate exact cement bags, aggregate weights, mixing water, and supplementary
+                    cementitious materials (Fly Ash, Slag, Silica Fume) with verified carbon offset savings.</p>
+                <div class="preset-pills">
+                    <button class="preset-btn" data-preset="slab">🏠 100m² Foundation Slab</button>
+                    <button class="preset-btn" data-preset="driveway">🚗 Heavy Driveway (C30/37)</button>
+                    <button class="preset-btn" data-preset="footing">🧱 Strip Footing (C20/25)</button>
+                    <button class="preset-btn" data-preset="column">🏢 Columns (C40/50)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Calculator -->
+        <div class="container" id="calculator">
+            <div class="calc-layout">
+                <!-- Input Card -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Structural Mix Inputs</span>
+                        <button class="btn btn-outline sm" id="resetDefaults" type="button">Reset</button>
+                    </div>
+                    <form id="calcForm" onsubmit="event.preventDefault()">
+                        <div class="form-group">
+                            <label class="form-label" for="strengthGrade">Target Concrete Grade</label>
+                            <select class="form-select" id="strengthGrade">
+                                <option value="C15">C15/20 (15 MPa) · Non-structural</option>
+                                <option value="C20">C20/25 (20 MPa) · Patios, Floors</option>
+                                <option value="C25" selected>C25/30 (25 MPa) · Standard Slabs</option>
+                                <option value="C30">C30/37 (30 MPa) · Pavements</option>
+                                <option value="C35">C35/45 (35 MPa) · Structural</option>
+                                <option value="C40">C40/50 (40 MPa) · Columns &amp; Beams</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dimensions (Meters: L × W × Depth)</label>
+                            <div class="grid-3">
+                                <input type="number" step="0.05" class="form-input" id="dimLength" value="10.0"
+                                    aria-label="Length in meters" />
+                                <input type="number" step="0.05" class="form-input" id="dimWidth" value="5.0"
+                                    aria-label="Width in meters" />
+                                <input type="number" step="0.01" class="form-input" id="dimDepth" value="0.15"
+                                    aria-label="Depth in meters" />
+                            </div>
+                        </div>
+                        <div class="grid-2 form-group">
+                            <div>
+                                <label class="form-label" for="wastage">Wastage</label>
+                                <select class="form-select" id="wastage">
+                                    <option value="0">0%</option>
+                                    <option value="5">5%</option>
+                                    <option value="10" selected>10%</option>
+                                    <option value="15">15%</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label" for="maxAgg">Max Aggregate</label>
+                                <select class="form-select" id="maxAgg">
+                                    <option value="10">10 mm</option>
+                                    <option value="20" selected>20 mm</option>
+                                    <option value="40">40 mm</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="scmType">Eco-Cement Replacement (SCM)</label>
+                            <select class="form-select" id="scmType">
+                                <option value="none">100% Ordinary Portland Cement</option>
+                                <option value="flyash" selected>Fly Ash (ASTM C618)</option>
+                                <option value="ggbfs">GGBFS Slag (BS EN 15167)</option>
+                                <option value="silica">Silica Fume (ASTM C1240)</option>
+                            </select>
+                            <input type="range" min="0" max="50" step="5" value="20" id="scmSlider"
+                                style="width: 100%; margin-top: 8px;" aria-label="Cement replacement percentage" />
+                            <span id="scmPctLabel" style="font-size: 11px; font-weight: bold; color: #059669;">20%
+                                SCM</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
+                            <button type="button" class="btn btn-primary btn-full" id="addEstimate">Add Pro Estimate
+                                Report for this mix</button>
+                            <button type="button" class="btn btn-outline btn-full" id="printSheet">Print Batch
+                                Sheet</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results Card -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Batching Quantities</span>
+                        <span class="chip" id="netVolumeBadge">8.25 m³ Batch</span>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-box highlight">
+                            <div class="metric-val" id="resCementBags">56</div>
+                            <div class="metric-lbl">Cement Bags (50kg)</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-val" id="resSandTonnes">7.1 t</div>
+                            <div class="metric-lbl">Sand (Tonnes)</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-val" id="resGravelTonnes">10.4 t</div>
+                            <div class="metric-lbl">Gravel (Tonnes)</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-val" id="resWaterLiters">1,485 L</div>
+                            <div class="metric-lbl">Water (Liters)</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-val" id="resMaterialCost">₱0</div>
+                            <div class="metric-lbl">Est. material cost</div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>Mass</th>
+                                    <th>Units</th>
+                                    <th class="num">Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p class="note" style="margin-top:8px">Mixing water is adjusted for the maximum aggregate size:
+                        +2% at 10 mm, -3% at 40 mm.</p>
+
+                    <!-- SCM Carbon Box -->
+                    <div class="carbon-box">
+                        <strong>Embodied Carbon (CO₂e) Reduction</strong>
+                        <p id="carbonDetails" style="font-size: 13px; color: #064E3B; margin-top: 4px;">Saved 476 kg
+                            CO₂e using SCM replacement.</p>
+                    </div>
+
+                    <!-- Email verification card, filled by js/verification.js -->
+                    <div id="verificationCard"
+                        style="margin-top: 20px; padding: 16px; border: 1px solid #E5E7EB; border-radius: var(--radius-md); background: #F9FAFB;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="section-head row" style="margin-bottom:12px">
+                <div>
+                    <h2 data-words>What's in the mix</h2>
+                    <p>Every batch sheet is built from a volumetric mix table and the prices your supplier quotes.</p>
+                </div>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-head"><span class="step-icon" data-icon="ruler"></span><span
+                            class="step-num">01</span></div>
+                    <h3>Enter the dimensions</h3>
+                    <p>Length, width and depth, plus a wastage allowance for the pour.</p>
+                </div>
+                <div class="step">
+                    <div class="step-head"><span class="step-icon" data-icon="leaf"></span><span
+                            class="step-num">02</span></div>
+                    <h3>Pick the SCM replacement</h3>
+                    <p>Fly ash, slag or silica fume, with the CO₂e you save shown as you move the slider.</p>
+                </div>
+                <div class="step">
+                    <div class="step-head"><span class="step-icon" data-icon="printer"></span><span
+                            class="step-num">03</span></div>
+                    <h3>Print the batch sheet</h3>
+                    <p>Bags, tonnes, litres and material cost on one page for the site office.</p>
+                </div>
+                <div class="step">
+                    <div class="step-head"><span class="step-icon" data-icon="report"></span><span
+                            class="step-num">04</span></div>
+                    <h3>Order the report</h3>
+                    <p>Add an engineer-checked report from your mix, or pick a monthly plan.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCM guide (the nav's SCM Guide link) -->
+        <section class="section" id="engineering">
+            <div class="container">
+                <div class="section-head">
+                    <h2 data-words>SCM guide</h2>
+                    <p>Supplementary cementitious materials replace part of the Portland cement. The mix table above
+                        assumes the replacement is by binder mass, and the water/cement ratio stays based on the total
+                        binder.</p>
+                </div>
+                <div class="services-grid" id="scm-grid"></div>
+                <p class="note" style="margin-top:16px">Replacements above the listed range need a trial batch: early
+                    strength slows down, so formwork stripping times have to move with it. Carbon savings use 0.83 kg
+                    CO₂e per kg of cement replaced.</p>
+            </div>
+        </section>
+
+        <!-- Plans & pricing -->
+        <section class="section" id="pricing" style="padding-top:0">
+            <div class="container">
+                <div class="section-head row">
+                    <div>
+                        <h2 data-words>Plans &amp; pricing</h2>
+                        <p>Monthly workspaces for teams running more than one pour. Prices exclude 12% VAT.</p>
+                    </div>
+                    <a href="plans.html" class="btn btn-outline">Compare plans</a>
+                </div>
+                <div class="pricing-grid" id="plans-grid"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+</body>
+
+</html>

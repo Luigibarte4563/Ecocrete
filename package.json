@@ -1,0 +1,17 @@
+{
+  "name": "ecocrete-static",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "EcoCrete concrete estimation site with cart checkout, email verification and a Gmail mailer",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "nodemailer": "^10.1.7"
+  }
+}
