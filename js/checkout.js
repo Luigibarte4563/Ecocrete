@@ -12,9 +12,9 @@ const PAYMENT_GROUPS = [
     title: "Online Banking",
     methods: [
       { id: "bdo", badge: "BDO", label: "BDO", hint: "Transfer from your BDO account" },
-      { id: "bpi", badge: "BPI", label: "BPI", hint: "Transfer from your BPI account" },
+      { id: "bpi", badge: "BPI", label: "BPI", hint: "Transfer from your BPI account", disabled: true },
       { id: "metrobank", badge: "MB", label: "Metrobank", hint: "Transfer from your Metrobank account" },
-      { id: "landbank", badge: "LBP", label: "Landbank", hint: "Transfer from your Landbank account" },
+      { id: "landbank", badge: "LBP", label: "Landbank", hint: "Transfer from your Landbank account", disabled: true },
     ],
   },
   {
@@ -96,7 +96,8 @@ function formView() {
   const t = totals(sub);
   const minDate = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
   const startedAt = Date.now();
-  const first = METHODS[0].id;
+  // first method that is not disabled
+  const first = METHODS.find((m) => !m.disabled).id;
 
   app.innerHTML = `<section class="page"><div class="container">
     <div class="page-head">
@@ -142,10 +143,10 @@ function formView() {
               (g) => `<h3 class="method-group">${g.title}</h3>
               ${g.methods
                 .map(
-                  (m) => `<label class="method ${m.id === first ? "active" : ""}">
-                <input type="radio" name="method" value="${m.id}" class="sr-only" ${m.id === first ? "checked" : ""}>
+                  (m) => `<label class="method ${m.id === first ? "active" : ""} ${m.disabled ? "disabled" : ""}" ${m.disabled ? `data-disabled="${m.label}"` : ""}>
+                <input type="radio" name="method" value="${m.id}" class="sr-only" ${m.id === first ? "checked" : ""} ${m.disabled ? "disabled" : ""}>
                 <span class="method-icon">${m.badge}</span>
-                <span class="method-text"><strong>${m.label}</strong><small>${m.hint}</small></span>
+                <span class="method-text"><strong>${m.label}</strong><small>${m.disabled ? "Disabled" : m.hint}</small></span>
                 <span class="radio"></span>
               </label>`,
                 )
@@ -175,10 +176,23 @@ function formView() {
   fillIcons();
 
   const form = document.getElementById("checkout");
+  const status = document.getElementById("mail-status");
+  const defaultNote = status.textContent;
 
   form.addEventListener("change", (e) => {
     if (e.target.name !== "method") return;
     form.querySelectorAll(".method").forEach((el) => el.classList.toggle("active", el.querySelector("input").checked));
+    status.textContent = defaultNote;
+    status.classList.remove("error");
+  });
+
+  // disabled methods can't be chosen; tell the person why
+  form.addEventListener("click", (e) => {
+    const el = e.target.closest(".method.disabled");
+    if (!el) return;
+    e.preventDefault();
+    status.textContent = `${el.dataset.disabled} is currently disabled. Please choose another payment method.`;
+    status.classList.add("error");
   });
 
   // mail the order first; only redirect once the server accepted it
@@ -187,8 +201,10 @@ function formView() {
     const data = new FormData(form);
     const method = METHODS.find((m) => m.id === data.get("method"));
     const pay = document.getElementById("pay");
-    const status = document.getElementById("mail-status");
-    const note = status.textContent;
+    // clear any earlier "disabled" message before sending
+    status.textContent = defaultNote;
+    status.classList.remove("error");
+    const note = defaultNote;
     const orderId = `ECO-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     const refundUrl = new URL("refund.html", location.href);
     refundUrl.searchParams.set("ref", orderId);
