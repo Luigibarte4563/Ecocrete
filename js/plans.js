@@ -32,7 +32,7 @@ function cardHTML(p, i) {
       <p class="tier-price">${formatPHP(p.price)}<small> / month</small></p>
       <p class="tier-note">Excluding 12% VAT. ${p.unit}.</p>
       <ul class="features">${p.features.map((f) => `<li>${icon("check")}<span>${f}</span></li>`).join("")}</ul>
-      <button type="button" class="btn ${p.featured ? "btn-primary" : "btn-outline"} btn-full" data-add="${p.id}">${icon("plus")} Add to cart</button>
+      <button type="button" class="btn ${p.featured ? "btn-primary" : "btn-outline"} btn-full" data-add="${p.id}">${icon("plus")} Add plan</button>
     </article>
   </div>`;
 }

@@ -54,12 +54,12 @@ function receiptHTML(order) {
 }
 
 function requestMessage({ reference, email, reason }) {
-  const lines = [`Refund request for order ${reference}.`];
+  const lines = [`A customer asked to cancel order ${reference} and claim the refund below.`];
 
   if (order) {
     lines.push(
       "",
-      "Items:",
+      "Order lines:",
       ...order.items
         .filter((item) => item && typeof item === "object")
         .map((item) => `- ${item.name} × ${Number(item.qty) || 1} — ${money(item.price * (Number(item.qty) || 1))}`),
@@ -73,7 +73,7 @@ function requestMessage({ reference, email, reason }) {
     );
   }
 
-  lines.push("", `Contact email: ${email}`, `Reason: ${reason || "Not provided"}`, "", "We'll review the request and reply within 1 business day.");
+  lines.push("", `Contact email: ${email}`, `Reason: ${reason || "Not provided"}`, "", "Our dispatch desk reviews it and replies within 1 business day.");
   return lines.join("\n");
 }
 
@@ -91,7 +91,7 @@ app.innerHTML = `<section class="page"><div class="container">
           <legend><span>01</span>Refund details</legend>
           <div class="fields">
             ${order ? "" : `<label class="field"><span>Order reference</span><input class="form-input" name="ref" required maxlength="60" placeholder="ECO-ABC123"></label>`}
-            <label class="field"><span>Email used for the order</span><input class="form-input" name="email" type="email" required autocomplete="email" placeholder="juan@company.ph"></label>
+            <label class="field"><span>Email used for the order</span><input class="form-input" name="email" type="email" required autocomplete="email" placeholder="mario@bautistasons.ph"></label>
             <label class="field"><span>Reason for refund</span><select class="form-select" name="reason" required>
               <option value="" disabled selected>Select a reason…</option>
               ${REASONS.map((r) => `<option>${r}</option>`).join("")}
@@ -107,7 +107,7 @@ app.innerHTML = `<section class="page"><div class="container">
       <aside>
         <div class="summary">
           <h2>Refund policy</h2>
-          <p class="note">Cancel within 7 days of ordering. A 20% cancellation fee applies; you get 80% back. The refund is reviewed by our team.</p>
+          <p class="note">Cancel within 7 days of ordering and 80% comes back; the 20% balance covers batching and dispatch. Every request is reviewed by our dispatch desk.</p>
           <p class="note">Questions? ${CONTACT.email} · ${CONTACT.phone}</p>
         </div>
       </aside>

@@ -6,29 +6,28 @@ import { sendEmail } from "./mailer.js";
 import { encodeOrder } from "./refund-data.js";
 
 const PAYMENT_GROUPS = [
-  { title: "E-Wallet", methods: [{ id: "gcash", badge: "G", label: "GCash", hint: "Pay with your GCash wallet" }, { id: "maya", badge: "M", label: "Maya", hint: "Pay with your Maya wallet" }] },
+  { title: "Cash", methods: [{ id: "cod", badge: "₱", label: "Cash on delivery", hint: "Pay the dispatcher when the truck arrives" }] },
+  { title: "E-Wallet", methods: [{ id: "gcash", badge: "G", label: "GCash", hint: "Scan to pay from your GCash app" }, { id: "maya", badge: "M", label: "Maya", hint: "Pay from your Maya wallet" }] },
   {
     title: "Online Banking",
     methods: [
-      { id: "bdo", badge: "BDO", label: "BDO", hint: "BDO Unibank" },
-      { id: "bpi", badge: "BPI", label: "BPI", hint: "Bank of the Philippine Islands" },
-      { id: "metrobank", badge: "MB", label: "Metrobank", hint: "Metropolitan Bank & Trust" },
-      { id: "landbank", badge: "LBP", label: "Landbank", hint: "Land Bank of the Philippines" },
+      { id: "bdo", badge: "BDO", label: "BDO", hint: "Transfer from your BDO account" },
+      { id: "bpi", badge: "BPI", label: "BPI", hint: "Transfer from your BPI account" },
     ],
   },
   {
     title: "Debit or Credit Card",
     methods: [
-      { id: "debit", badge: "DR", label: "Debit card", hint: "Pay from your bank account" },
+      { id: "debit", badge: "DR", label: "Debit card", hint: "Charged straight from your bank account" },
       { id: "credit", badge: "CR", label: "Credit card", hint: "Pay with your credit line" },
     ],
   },
-  { title: "Cash", methods: [{ id: "cash", badge: "₱", label: "Cash on site", hint: "Pay when the engineer or supplier arrives" }] },
+  { title: "Account", methods: [{ id: "account", badge: "AC", label: "Charge to account", hint: "For approved contractor accounts" }] },
 ];
 
 const METHODS = PAYMENT_GROUPS.flatMap((g) => g.methods.map((m) => ({ ...m, group: g.title })));
 
-const REGIONS = ["Metro Manila (NCR)", "Luzon (outside NCR)", "Visayas", "Mindanao"];
+const REGIONS = ["Metro Manila", "Cavite–Laguna", "Central Luzon", "Other area (surcharge may apply)"];
 const PH_MOBILE = "^(\\+?63|0)9\\d{2}\\s?\\d{3}\\s?\\d{4}$";
 const app = document.getElementById("app");
 const items = cart.lines();
@@ -38,22 +37,30 @@ const field = (label, input, cls = "") => `<label class="field ${cls}"><span>${l
 // plain-text body of the order email; the server escapes it and wraps it in the HTML template
 function orderMessage(data, method, lines, t, orderId) {
   const g = (key) => String(data.get(key) || "").trim();
-  const firstName = g("name").split(/\s+/)[0] || "there";
-  const rawDate = g("date");
+  const firstName = g("delivery_name").split(/\s+/)[0] || "there";
+  const rawDate = g("pour_date");
   const startDate = rawDate
     ? new Date(`${rawDate}T00:00:00`).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })
     : "Not set";
   const body = [
-    `Thank you for your order, ${firstName}. We've received it and will confirm by email within 24 hours.`,
+    `Thanks for your order, ${firstName}. Here is how a pour works with EcoCrete:`,
+    "",
+    "1. We confirm stock and truck availability for your pour date.",
+    "2. The dispatcher calls 24 hours before delivery with the exact arrival window.",
+    "3. The driver brings the batch ticket; you check the slump before pouring.",
     "",
     `Order reference: ${orderId}`,
-    `Preferred start date: ${startDate}`,
-    `Project address: ${g("address")}`,
-    `Region: ${g("region")}`,
-    `Contact: ${g("name")}`,
-    g("company") ? `Company: ${g("company")}` : null,
-    `Email: ${g("email")}`,
-    `Phone: ${g("phone")}`,
+    `Preferred pour date: ${startDate}`,
+    `Delivery window: ${g("window") || "Not set"}`,
+    `Pour volume: ${g("pour_volume")} m³`,
+    `Pump truck: ${g("pump")}`,
+    `Delivery address: ${g("delivery_address")}`,
+    `Supply area: ${g("supply_region")}`,
+    g("access") ? `Site access notes: ${g("access")}` : null,
+    `Contact: ${g("delivery_name")}`,
+    g("firm_name") ? `Company: ${g("firm_name")}` : null,
+    `Email: ${g("delivery_email")}`,
+    `Phone: ${g("delivery_phone")}`,
     `Payment method: ${method ? `${method.group} - ${method.label}` : "Not selected"}`,
     "",
     "Order",
@@ -63,9 +70,9 @@ function orderMessage(data, method, lines, t, orderId) {
     `VAT (12%): ${formatPHP(t.vat)}`,
     `Total: ${formatPHP(t.total)}`,
     "",
-    `Refundable: cancel within 7 days and get ${formatPHP(t.total * 0.8)} back (a 20% cancellation fee of ${formatPHP(t.total * 0.2)} applies).`,
+    `Plans change: cancel within 7 days and ${formatPHP(t.total * 0.8)} comes back; the ${formatPHP(t.total * 0.2)} balance covers batching and dispatch.`,
     "",
-    `If anything is wrong, reply to this email or call ${CONTACT.phone}.`,
+    `Questions? Reply to this email or call ${CONTACT.phone}.`,
   ];
   return body.filter((line) => line !== null).join("\n");
 }
@@ -74,8 +81,8 @@ function emptyView() {
   app.innerHTML = `<section class="page"><div class="container">
     <div class="empty-state">
       <div class="empty-icon">${icon("bag")}</div>
-      <h2>Your cart is empty</h2>
-      <p>Add a service or a plan before checking out.</p>
+      <h2>Nothing in your order yet</h2>
+      <p>Add a mix, a service or a plan to schedule a pour.</p>
       <a href="services.html" class="btn btn-primary">Browse services${arrow()}</a>
     </div>
   </div></section>`;
@@ -92,31 +99,37 @@ function formView() {
   app.innerHTML = `<section class="page"><div class="container">
     <div class="page-head">
       <div>
-        <a href="cart.html" class="text-link back">← Back to cart</a>
-        <h1 class="page-title">Checkout</h1>
+        <a href="cart.html" class="text-link back">← Back to your order</a>
+        <h1 class="page-title">Schedule your pour</h1>
       </div>
     </div>
 
     <form class="split" id="checkout">
       <div>
         <fieldset>
-          <legend><span>01</span>Contact details</legend>
+          <legend><span>01</span>Delivery contact</legend>
           <div class="fields two">
-            ${field("Full name", `<input class="form-input" name="name" required autocomplete="name" placeholder="Juan Dela Cruz">`)}
-            ${field("Company (optional)", `<input class="form-input" name="company" autocomplete="organization" placeholder="ABC Builders Inc.">`)}
-            ${field("Email", `<input class="form-input" name="email" type="email" required autocomplete="email" placeholder="juan@company.ph">`)}
-            ${field("Mobile number", `<input class="form-input" name="phone" type="tel" required autocomplete="tel" placeholder="0917 123 4567" pattern="${PH_MOBILE}" title="PH mobile number, e.g. 0917 123 4567">`)}
+            ${field("Delivery contact name", `<input class="form-input" name="delivery_name" required autocomplete="name" placeholder="Mario Bautista">`)}
+            ${field("Company / firm (optional)", `<input class="form-input" name="firm_name" autocomplete="organization" placeholder="Bautista & Sons Construction">`)}
+            ${field("Email address", `<input class="form-input" name="delivery_email" type="email" required autocomplete="email" placeholder="mario@bautistasons.ph">`)}
+            ${field("Mobile (for the dispatcher)", `<input class="form-input" name="delivery_phone" type="tel" required autocomplete="tel" placeholder="0920 776 3410" pattern="${PH_MOBILE}" title="PH mobile number, e.g. 0920 776 3410">`)}
           </div>
         </fieldset>
 
         <fieldset>
-          <legend><span>02</span>Project</legend>
+          <legend><span>02</span>Delivery</legend>
           <div class="fields">
-            ${field("Project address", `<input class="form-input" name="address" required placeholder="Lot 4, Brgy. San Isidro, Antipolo City">`)}
+            ${field("Delivery address", `<input class="form-input" name="delivery_address" required placeholder="Km 42, McArthur Hwy, Meycauayan, Bulacan">`)}
+            ${field("Site access notes (optional)", `<input class="form-input" name="access" placeholder="Narrow gate · pump truck needed">`)}
             <div class="fields two">
-              ${field("Region", `<select class="form-select" name="region" required><option value="" disabled selected>Select region</option>${REGIONS.map((r) => `<option>${r}</option>`).join("")}</select>`)}
-              ${field("Preferred start date", `<input class="form-input" name="date" type="date" required min="${minDate}">`)}
+              ${field("Pour volume (m³)", `<input class="form-input" name="pour_volume" type="number" min="0.5" step="0.25" placeholder="12.5" required>`)}
+              ${field("Pump truck required", `<select class="form-select" name="pump" required><option value="" disabled selected>Select</option><option>Yes</option><option>No</option><option>Not sure</option></select>`)}
             </div>
+            <div class="fields two">
+              ${field("Supply area", `<select class="form-select" name="supply_region" required><option value="" disabled selected>Select area</option>${REGIONS.map((r) => `<option>${r}</option>`).join("")}</select>`)}
+              ${field("Preferred pour date", `<input class="form-input" name="pour_date" type="date" required min="${minDate}">`)}
+            </div>
+            ${field("Delivery window", `<select class="form-select" name="window" required><option value="" disabled selected>Select window</option><option>Morning (6am–10am)</option><option>Midday (10am–2pm)</option><option>Afternoon (2pm–6pm)</option></select>`)}
           </div>
         </fieldset>
 
@@ -150,9 +163,9 @@ function formView() {
             )
             .join("")}</ul>
           ${cart.totalsHTML(sub)}
-          <p class="note">Refundable. Cancel within 7 days using the link in your confirmation email. A 20% cancellation fee applies; you get ${formatPHP(t.total * 0.8)} back.</p>
-          <button type="submit" class="btn btn-primary btn-full" id="pay">${icon("lock")} Pay ${formatPHP(t.total)}</button>
-          <p class="note" id="mail-status" role="status">Your confirmation email is real. Payment is a demo; no card is charged.</p>
+          <p class="note">Cancel within 7 days and 80% comes back; the 20% balance covers batching and dispatch.</p>
+          <button type="submit" class="btn btn-primary btn-full" id="pay">${icon("lock")} Place order — ${formatPHP(t.total)}</button>
+          <p class="note" id="mail-status" role="status">Demo checkout — no card is charged. The confirmation email is real.</p>
         </div>
       </aside>
     </form>
@@ -189,15 +202,15 @@ function formView() {
       }),
     );
     pay.disabled = true;
-    pay.innerHTML = `${icon("loader", "spin")} Processing payment…`;
+    pay.innerHTML = `${icon("loader", "spin")} Reserving your truck…`;
     paying = true;
 
     let mail;
     try {
       mail = await sendEmail(
         {
-          to: data.get("email"),
-          subject: `Your EcoCrete order (${orderId})`,
+          to: data.get("delivery_email"),
+          subject: `EcoCrete order ${orderId} — pouring details inside`,
           message: orderMessage(data, method, items, t, orderId),
           website: data.get("website") || "",
           cta: { label: "Request a refund", href: refundUrl.href },
@@ -208,7 +221,7 @@ function formView() {
       // no order placed and no redirect, so the customer never sees a false "confirmation"
       status.textContent = `${note} ${err.message}`;
       status.classList.add("error");
-      pay.innerHTML = `${icon("lock")} Pay ${formatPHP(t.total)}`;
+      pay.innerHTML = `${icon("lock")} Place order — ${formatPHP(t.total)}`;
       pay.disabled = false;
       paying = false;
       return;
@@ -218,8 +231,8 @@ function formView() {
     setTimeout(() => {
       cart.placeOrder({
         id: orderId,
-        name: data.get("name"),
-        email: data.get("email"),
+        name: data.get("delivery_name"),
+        email: data.get("delivery_email"),
         method: method?.label || "Not selected",
         items: items.map((l) => ({ id: l.id, name: l.name, unit: l.unit, qty: l.qty, price: l.price, meta: l.meta })),
         ...t,

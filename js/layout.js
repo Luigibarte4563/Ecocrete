@@ -26,7 +26,7 @@ function header() {
       </a>
       <nav class="nav-links">${links.join("")}</nav>
       <div class="nav-actions">
-        <button type="button" class="cart-btn" data-open-cart aria-label="Open cart">
+        <button type="button" class="cart-btn" data-open-cart aria-label="Open your order">
           ${icon("bag")}<span class="cart-count">0</span>
         </button>
         <button type="button" class="nav-btn" data-upgrade>Upgrade to Pro</button>
@@ -67,7 +67,7 @@ function footer() {
       </div>
     </div>
     <div class="container footer-bottom">
-      <p>© ${new Date().getFullYear()} ${BRAND.name}. Payment is a demo; no card is charged.</p>
+      <p>© ${new Date().getFullYear()} ${BRAND.name}. Demo checkout; no card is charged.</p>
       <p>Prices exclude 12% VAT.</p>
     </div>`;
 }
@@ -78,8 +78,8 @@ function drawerBody() {
   if (!items.length) {
     return `<div class="empty-state" style="border:none;box-shadow:none;padding:24px 0">
       <div class="empty-icon">${icon("bag")}</div>
-      <h2>Your cart is empty</h2>
-      <p>Add a service or a plan to get started.</p>
+      <h2>Nothing in your order yet</h2>
+      <p>Add a mix, a service or a plan to schedule a pour.</p>
       <a href="services.html" class="btn btn-primary">Browse services</a>
     </div>`;
   }
@@ -102,18 +102,18 @@ function drawerBody() {
     <div class="drawer-foot">
       ${cart.totalsHTML(cart.subtotal())}
       <div class="two">
-        <a href="cart.html" class="btn btn-outline">View cart</a>
-        <a href="checkout.html" class="btn btn-primary">Checkout</a>
+        <a href="cart.html" class="btn btn-outline">View order</a>
+        <a href="checkout.html" class="btn btn-primary">Schedule pour</a>
       </div>
     </div>`;
 }
 
 function drawer() {
-  return `<button type="button" class="drawer-backdrop" data-close-cart aria-label="Close cart"></button>
-    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="Your cart">
+  return `<button type="button" class="drawer-backdrop" data-close-cart aria-label="Close order"></button>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="Your order">
       <div class="drawer-head">
-        <h2>Your cart</h2>
-        <button type="button" class="icon-btn" data-close-cart aria-label="Close cart">${icon("x")}</button>
+        <h2>Your order</h2>
+        <button type="button" class="icon-btn" data-close-cart aria-label="Close order">${icon("x")}</button>
       </div>
       <div class="drawer-body"></div>
     </aside>`;
@@ -182,8 +182,8 @@ document.addEventListener("click", (e) => {
   if (addBtn) {
     cart.add(addBtn.dataset.add);
     const original = addBtn.innerHTML;
-    addBtn.innerHTML = `${icon("check")} Added to cart`;
-    toast(`${cart.count()} item${cart.count() === 1 ? "" : "s"} in your cart`);
+    addBtn.innerHTML = `${icon("check")} Added to order`;
+    toast(`${cart.count()} line${cart.count() === 1 ? "" : "s"} in your order`);
     setTimeout(() => openCart(true), 350);
     setTimeout(() => (addBtn.innerHTML = original), 1600);
   }

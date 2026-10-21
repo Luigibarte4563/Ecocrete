@@ -30,23 +30,23 @@ function render() {
           <div class="summary">
             <h2>Order summary</h2>
             ${cart.totalsHTML(cart.subtotal())}
-            <a href="checkout.html" class="btn btn-primary btn-full">Proceed to checkout</a>
-            <p class="note">Refundable within 7 days with a 20% cancellation fee.</p>
+            <a href="checkout.html" class="btn btn-primary btn-full">Schedule delivery</a>
+            <p class="note">Cancel within 7 days and 80% comes back; the 20% balance covers batching and dispatch.</p>
             <div><p class="summary-label">We accept</p>${badgesHTML()}</div>
           </div>
         </aside>
       </div>`
     : `<div class="empty-state">
         <div class="empty-icon">${icon("bag")}</div>
-        <h2>Your cart is empty</h2>
-        <p>Add a service or a plan to get started.</p>
+        <h2>Nothing in your order yet</h2>
+        <p>Add a mix, a service or a plan to schedule a pour.</p>
         <a href="services.html" class="btn btn-primary">Browse services${arrow()}</a>
       </div>`;
 
   app.innerHTML = `<section class="page"><div class="container">
       <div class="page-head">
-        <h1 class="page-title">Cart</h1>
-        ${items.length ? `<button type="button" class="text-link" id="clear">Clear cart</button>` : ""}
+        <h1 class="page-title">Your order</h1>
+        ${items.length ? `<button type="button" class="text-link" id="clear">Clear order</button>` : ""}
       </div>
       ${body}
     </div></section>`;

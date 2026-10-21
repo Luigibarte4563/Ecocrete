@@ -99,7 +99,7 @@ function addEstimate() {
     price: service.price,
     meta: `${r.volume.toFixed(2)} m³ · ${r.bags} bags${pct ? ` · ${pct}% ${scm.short}` : ""} · ${formatPHP(r.total)} materials`,
   });
-  toast(`${name} added to your cart`);
+  toast(`${name} added — ${cart.count()} line${cart.count() === 1 ? "" : "s"} in your order`);
   setTimeout(() => openCart(true), 350);
 }
 

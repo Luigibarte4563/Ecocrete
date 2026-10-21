@@ -214,7 +214,7 @@ function render() {
     const s = getService("project-tracker");
     if (!s) return;
     cart.add(s.id);
-    toast(`${s.name} added to your cart`);
+    toast(`${s.name} added to your order`);
     setTimeout(() => openCart(true), 350);
   });
 }
