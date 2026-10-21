@@ -31,7 +31,7 @@ const FAQS = [
   ["How accurate is the calculator?", "It uses volumetric mix design with a 10% wastage allowance by default, which is what most Philippine sites order against. Treat it as ±5% and still run a trial batch before the first structural pour."],
   ["Do I need a site visit?", "No. Estimates are desk-based from your plans, dimensions and photos. A site visit is only needed for unusual access or for sampling your aggregates."],
   ["What if my quarry's sand or gravel differs?", "Send the grading and the Custom Mix Design re-proportions the mix for the material you actually have, then adjusts after a trial batch."],
-  ["How do I pay?", "GCash, Maya, bank transfer (BDO or BPI), debit or credit card, cash on delivery, or charged to an approved contractor account. Prices exclude 12% VAT."],
+  ["How do I pay?", "GCash, Maya, bank transfer (BDO, BPI, Metrobank or Landbank), debit or credit card, cash on delivery, or charged to an approved contractor account. Prices exclude 12% VAT."],
   ["Can I cancel?", "Yes, within 7 days of booking. A 20% cancellation fee applies and you get 80% back. Request it from the link in your confirmation email."],
   ["Do you take projects outside the Philippines?", "No. We only work to NSCP and DPWH references, so we only serve sites in the Philippines."],
 ];

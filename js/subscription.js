@@ -8,6 +8,8 @@ const plan = PLANS.find((p) => p.featured) || PLANS[0];
 const BANKS = [
   { name: "BDO Unibank", account: "Account 0000-0000-0000 · BRSTN 000-000-000", holder: "EcoCrete Engineering" },
   { name: "Bank of the Philippine Islands", account: "Account 0000-0000-0000 · BRSTN 000-000-000", holder: "EcoCrete Engineering" },
+  { name: "Metrobank", account: "Account 0000-0000-0000 · BRSTN 000-000-000", holder: "EcoCrete Engineering" },
+  { name: "Land Bank of the Philippines", account: "Account 0000-0000-0000 · BRSTN 000-000-000", holder: "EcoCrete Engineering" },
   { name: "GCash (business)", account: "0917 000 0000", holder: "EcoCrete Engineering" },
 ];
 
