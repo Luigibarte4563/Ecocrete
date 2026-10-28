@@ -2,7 +2,7 @@
 
 Concrete mix estimation site: a batching calculator, a services catalogue, monthly plans, a cart
 and checkout with a real booking email, a refund flow, email verification and a demo workspace.
-Plain HTML, CSS and JavaScript, plus one small Node server for the Gmail mailer. No build step.
+Plain HTML, CSS and JavaScript, plus one small Node server for the Gmail mailer. No build step..
 
 ## Run
 
@@ -19,7 +19,7 @@ checkout will report that the email service is not running — always use `npm s
 ## Pages
 
 | Page | What it does |
-| --- | --- |
+| --- | --- | --- |
 | `index.html` | Mix calculator: dimensions, grade, wastage, aggregate size, SCM replacement, batch table with material cost, carbon saving, printable batch sheet, plans preview |
 | `services.html` | Five one-off services, what's-included comparison table, FAQ |
 | `plans.html` | Starter / Professional / Enterprise, comparison table, FAQ |
