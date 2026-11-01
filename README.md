@@ -1,10 +1,10 @@
-# EcoCrete
+# EcoCrete. 
 
 Concrete mix estimation site: a batching calculator, a services catalogue, monthly plans, a cart
 and checkout with a real booking email, a refund flow, email verification and a demo workspace.
-Plain HTML, CSS and JavaScript, plus one small Node server for the Gmail mailer. No build step..
+Plain HTML, CSS and JavaScript, plus one small Node server for the Gmail mailer. No build step..    
 
-## Run
+## Run.
 
 ```
 npm install
