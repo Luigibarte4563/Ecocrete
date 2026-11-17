@@ -1,4 +1,4 @@
-# EcoCrete. 
+# EcoCrete..... 
 
 Concrete mix estimation site: a batching calculator, a services catalogue, monthly plans, a cart
 and checkout with a real booking email, a refund flow, email verification and a demo workspace.
